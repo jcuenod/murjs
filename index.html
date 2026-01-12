@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>murjs - Todo App Example</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div id="app"></div>
+
+  <script type="module" src="./src/index.js"></script>
+
+  <script type="module">
+    import { html, mount, createReactive, effect } from './src/index.js';
+
+    // Load todos from localStorage
+    const savedTodos = localStorage.getItem('todos');
+    const initialTodos = savedTodos ? JSON.parse(savedTodos) : [];
+    console.log('Loaded', initialTodos.length, 'todos from localStorage');
+
+    // Shared reactive state
+    const state = createReactive({
+      todos: initialTodos,
+      inputValue: ''
+    });
+
+    // Use effect to automatically save todos to localStorage
+    effect(() => {
+      const todos = state.todos;
+      localStorage.setItem('todos', JSON.stringify(todos));
+      console.log('Saved', todos.length, 'todos to localStorage');
+    });
+
+    const addTodo = () => {
+      if (state.inputValue.trim()) {
+        state.todos = [...state.todos, {
+          id: Date.now(),
+          text: state.inputValue,
+          completed: false
+        }];
+        state.inputValue = '';
+      }
+    };
+
+    const toggleTodo = (id) => {
+      state.todos = state.todos.map(todo =>
+        todo.id === id ? { ...todo, completed: !todo.completed } : todo
+      );
+    };
+
+    const deleteTodo = (id) => {
+      state.todos = state.todos.filter(todo => todo.id !== id);
+    };
+
+    // TodoItem component - receives todo as prop
+    const TodoItem = (props) => {
+      const { todo, onToggle, onDelete } = props;
+
+      return html`
+        <li class="${todo.completed ? 'completed' : ''}">
+          <span class="todo-text" onClick=${() => onToggle(todo.id)}>
+            ${todo.text}
+          </span>
+          <button class="delete-btn" onClick=${() => onDelete(todo.id)}>
+            Delete
+          </button>
+        </li>
+      `;
+    };
+
+    // TodoList component - receives todos array and handlers as props
+    const TodoList = (props) => {
+      const { todos, onToggle, onDelete } = props;
+
+      return html`
+        <ul>
+          ${todos.map(todo => TodoItem({ todo, onToggle, onDelete }))}
+        </ul>
+      `;
+    };
+
+    // TodoInput component - receives input value and handlers as props
+    const TodoInput = (props) => {
+      const { value, onInput, onAdd } = props;
+
+      return html`
+        <div class="todo-input">
+          <input
+            type="text"
+            value="${value}"
+            placeholder="Enter a todo..."
+            onInput=${(e) => onInput(e.target.value)}
+            onKeypress=${(e) => { if (e.key === 'Enter') onAdd(); }}
+          />
+          <button onClick=${onAdd}>Add Todo</button>
+        </div>
+      `;
+    };
+
+    // Main App component - manages state and passes it down
+    const App = () => {
+      const handleInput = (value) => {
+        state.inputValue = value;
+      };
+
+      return html`
+        <div>
+          <h1>My Todo App</h1>
+          ${TodoInput({
+            value: state.inputValue,
+            onInput: handleInput,
+            onAdd: addTodo
+          })}
+          ${TodoList({
+            todos: state.todos,
+            onToggle: toggleTodo,
+            onDelete: deleteTodo
+          })}
+          <footer class="app-footer">
+            <p>Built with <a href="https://github.com/jcuenod/murjs" target="_blank">murjs</a></p>
+          </footer>
+        </div>
+      `;
+    };
+
+    // Mount the app
+    mount(App, document.getElementById('app'));
+  </script>
+</body>
+</html>

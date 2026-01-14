@@ -51,7 +51,11 @@ function parseHTML(htmlString, values) {
                    trimmed.match(SELF_CLOSING_TAG_REGEX);
 
   if (!tagMatch) {
-    return processTextNode(trimmed, values);
+    const result = processTextNode(trimmed, values);
+    if (Array.isArray(result)) {
+      throw new Error('murjs: Templates must have a single root element. Wrap multiple elements in a container.');
+    }
+    return result;
   }
 
   const tagName = tagMatch[1];

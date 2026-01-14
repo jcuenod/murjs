@@ -133,8 +133,9 @@ export function patch(parent, el, oldVNode, newVNode) {
     if (patchObj.childPatches.keyed) {
       patchKeyedChildren(el, patchObj.childPatches, oldVNode, newVNode);
     } else {
+      const childNodes = Array.from(el.childNodes);
       patchObj.childPatches.patches.forEach((_, i) => {
-        patch(el, el.childNodes[i], oldVNode.children[i], newVNode.children[i]);
+        patch(el, childNodes[i], oldVNode.children[i], newVNode.children[i]);
       });
     }
   }

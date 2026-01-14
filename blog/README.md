@@ -1,6 +1,6 @@
 # Building a Reactive Declarative UI Framework with Vanilla JavaScript
 
-A 7-part blog series that teaches you how modern UI frameworks work by building one from scratch using only vanilla JavaScript. The result is **murjs** - a minimal reactive UI framework.
+An 8-part blog series that teaches you how modern UI frameworks work by building one from scratch using only vanilla JavaScript. The result is **murjs** - a minimal reactive UI framework.
 
 ## Overview
 
@@ -12,6 +12,7 @@ By the end of this series, you'll have built a complete reactive UI framework si
 - Component-based architecture
 - Reactive state management with JavaScript Proxies
 - HTML template literals (JSX-like syntax without a build step)
+- Key-based list reconciliation for efficient updates
 - A complete todo app demonstrating all concepts
 
 ## The Series
@@ -58,6 +59,12 @@ Add JSX-like syntax using tagged template literals, enabling HTML-like code that
 
 **Key concepts**: Tagged templates, HTML parsing, developer experience
 
+### [Part 8: Keys - Efficient List Reconciliation](08-keys.md)
+
+Add key-based reconciliation for lists, enabling efficient updates when items are added, removed, or reordered.
+
+**Key concepts**: Keyed diffing, DOM reordering, stable identity, performance optimization
+
 ## Prerequisites
 
 - JavaScript fundamentals (functions, objects, arrays)
@@ -70,7 +77,7 @@ No prior framework knowledge needed! That's what you're learning.
 
 Each part builds on the previous one. You can:
 
-1. **Read sequentially** - Start at Part 1 and work through to Part 7
+1. **Read sequentially** - Start at Part 1 and work through to Part 8
 2. **Code along** - Each part includes complete code you can type and test
 3. **Experiment** - Try modifications to understand how things work
 4. **Reference the source** - The complete implementation is in the [src/](../src/) directory

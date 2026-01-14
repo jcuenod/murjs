@@ -351,7 +351,9 @@ You've built a reactive UI framework from scratch. You understand:
 
 You can now read any framework's source code and understand what's happening.
 
-Go build something amazing!
+But wait—there's one more optimization we can add: keyed list reconciliation.
+
+**Next**: [Part 8: Keys - Efficient List Reconciliation](08-keys.md)
 
 ---
 

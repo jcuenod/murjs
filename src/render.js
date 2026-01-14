@@ -25,6 +25,7 @@ function setProps(el, props) {
 }
 
 function setProp(el, key, value) {
+  if (key === 'key') return;
   if (key.startsWith('on')) {
     const eventName = key.slice(2).toLowerCase();
 
@@ -48,6 +49,33 @@ function setProp(el, key, value) {
     el.value = value;
   } else {
     el.setAttribute(key, value);
+  }
+}
+
+function patchKeyedChildren(parent, childPatches, oldVNode, newVNode) {
+  const oldDomChildren = Array.from(parent.childNodes);
+  const newElements = [];
+
+  childPatches.patches.forEach(p => {
+    if (p.newIndex === null) return;
+
+    if (p.oldIndex !== null) {
+      const el = oldDomChildren[p.oldIndex];
+      const patchedEl = patch(parent, el, oldVNode.children[p.oldIndex], newVNode.children[p.newIndex]);
+      newElements[p.newIndex] = patchedEl;
+    } else {
+      newElements[p.newIndex] = createElement(p.patch.vnode);
+    }
+  });
+
+  newElements.forEach((el, i) => {
+    if (parent.childNodes[i] !== el) {
+      parent.insertBefore(el, parent.childNodes[i] || null);
+    }
+  });
+
+  while (parent.childNodes.length > newElements.length) {
+    parent.removeChild(parent.lastChild);
   }
 }
 
@@ -102,14 +130,13 @@ export function patch(parent, el, oldVNode, newVNode) {
       }
     });
 
-    patchObj.childPatches.forEach((childPatch, i) => {
-      patch(
-        el,
-        el.childNodes[i],
-        oldVNode.children[i],
-        newVNode.children[i]
-      );
-    });
+    if (patchObj.childPatches.keyed) {
+      patchKeyedChildren(el, patchObj.childPatches, oldVNode, newVNode);
+    } else {
+      patchObj.childPatches.patches.forEach((_, i) => {
+        patch(el, el.childNodes[i], oldVNode.children[i], newVNode.children[i]);
+      });
+    }
   }
 
   return el;

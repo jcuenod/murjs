@@ -35,7 +35,7 @@ export function diff(oldVNode, newVNode) {
   const propPatches = diffProps(oldVNode.props, newVNode.props);
   const childPatches = diffChildren(oldVNode.children, newVNode.children);
 
-  if (propPatches.length > 0 || childPatches.length > 0) {
+  if (propPatches.length > 0 || childPatches.patches.length > 0) {
     return { type: 'UPDATE', propPatches, childPatches };
   }
 
@@ -60,14 +60,72 @@ function diffProps(oldProps, newProps) {
   return patches;
 }
 
-function diffChildren(oldChildren, newChildren) {
-  const patches = [];
-  const maxLength = Math.max(oldChildren.length, newChildren.length);
+let warnedMixedKeys = false;
+let warnedNoKeys = false;
 
-  for (let i = 0; i < maxLength; i++) {
-    const patch = diff(oldChildren[i], newChildren[i]);
-    patches.push(patch);
+function diffChildren(oldChildren, newChildren) {
+  const keyedCount = newChildren.filter(c => c?.props?.key != null).length;
+  const hasKeys = keyedCount > 0;
+  const allKeyed = keyedCount === newChildren.length;
+
+  if (hasKeys && !allKeyed && !warnedMixedKeys) {
+    warnedMixedKeys = true;
+    console.warn('murjs: Mixed keyed and unkeyed children. All siblings should have keys.');
+  } else if (!hasKeys && newChildren.length > 1 && !warnedNoKeys) {
+    warnedNoKeys = true;
+    console.warn('murjs: List rendered without keys. Add "key" prop for better performance.');
   }
 
-  return patches;
+  if (!allKeyed) {
+    const patches = [];
+    const maxLength = Math.max(oldChildren.length, newChildren.length);
+    for (let i = 0; i < maxLength; i++) {
+      patches.push(diff(oldChildren[i], newChildren[i]));
+    }
+    return { keyed: false, patches };
+  }
+
+  const oldKeyMap = new Map();
+  oldChildren.forEach((child, i) => {
+    const key = child?.props?.key;
+    if (key != null) oldKeyMap.set(key, { child, index: i });
+  });
+
+  const patches = [];
+  const usedOldIndices = new Set();
+
+  newChildren.forEach((newChild, newIndex) => {
+    const key = newChild?.props?.key;
+    const oldEntry = key != null ? oldKeyMap.get(key) : null;
+
+    if (oldEntry) {
+      usedOldIndices.add(oldEntry.index);
+      patches.push({
+        oldIndex: oldEntry.index,
+        newIndex,
+        key,
+        patch: diff(oldEntry.child, newChild)
+      });
+    } else {
+      patches.push({
+        oldIndex: null,
+        newIndex,
+        key,
+        patch: { type: 'CREATE', vnode: newChild }
+      });
+    }
+  });
+
+  oldChildren.forEach((child, i) => {
+    if (!usedOldIndices.has(i)) {
+      patches.push({
+        oldIndex: i,
+        newIndex: null,
+        key: child?.props?.key,
+        patch: { type: 'REMOVE' }
+      });
+    }
+  });
+
+  return { keyed: true, patches };
 }

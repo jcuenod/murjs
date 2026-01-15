@@ -65,6 +65,12 @@ Add key-based reconciliation for lists, enabling efficient updates when items ar
 
 **Key concepts**: Keyed diffing, DOM reordering, stable identity, performance optimization
 
+### [Part 9: Namespaces - Making SVG and MathML Work](09-namespaces.md)
+
+Fix SVG and MathML rendering by using the correct XML namespaces when creating elements.
+
+**Key concepts**: XML namespaces, createElementNS, namespace inheritance, foreignObject
+
 ## Prerequisites
 
 - JavaScript fundamentals (functions, objects, arrays)
@@ -77,7 +83,7 @@ No prior framework knowledge needed! That's what you're learning.
 
 Each part builds on the previous one. You can:
 
-1. **Read sequentially** - Start at Part 1 and work through to Part 8
+1. **Read sequentially** - Start at Part 1 and work through to Part 9
 2. **Code along** - Each part includes complete code you can type and test
 3. **Experiment** - Try modifications to understand how things work
 4. **Reference the source** - The complete implementation is in the [src/](../src/) directory

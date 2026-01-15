@@ -300,3 +300,5 @@ The foundation is solid. The rest is features.
 - [index.html](../index.html) - Working todo app with keys
 
 **Previous**: [Part 7: HTML Template Literals](07-html-templates.md)
+
+**Next**: [Part 9: Namespaces - Making SVG and MathML Work](09-namespaces.md)
